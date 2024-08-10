@@ -1,0 +1,6 @@
+{
+    "rewrites": [
+      { "source": "/test-ip", "destination": "/api/test-ip" }
+    ]
+  }
+  
