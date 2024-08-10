@@ -1,6 +1,7 @@
 // server.js
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors'); // Assure-toi d'importer le package cors
 
 // Modèle Mongoose pour Visitor
 const visitorSchema = new mongoose.Schema({
@@ -16,19 +17,29 @@ mongoose.connect('mongodb+srv://heshimajulienofficial:gZo66bAOKJBetFSQ@localisat
   .then(() => console.log('Connecté à MongoDB'))
   .catch(err => console.error('Erreur de connexion à MongoDB:', err));
 
+// Configurer CORS
+const allowedOrigins = ['https://track-ip-adress.vercel.app']; // Liste des domaines autorisés
+app.use(cors({
+  origin: function(origin, callback){
+    if(!origin || allowedOrigins.indexOf(origin) !== -1){
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
+
 app.use(express.json());
 
 app.get('/', async (req, res) => {
   try {
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    
+
     // Enregistre l'adresse IP dans MongoDB
-    const visitor = await Visitor.create({ ip });
-    
-    // Log d'enregistrement
-    console.log(`Adresse IP enregistrée: ${visitor.ip} à ${visitor.timestamp}`);
-    
-    res.send('Adresse IP enregistrée.');
+    await Visitor.create({ ip });
+
+    // Envoie l'adresse IP au client
+    res.json({ ip });
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement de l\'adresse IP:', error);
     res.status(500).send('Erreur lors de l\'enregistrement de l\'adresse IP.');
