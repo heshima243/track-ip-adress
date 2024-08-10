@@ -8,7 +8,7 @@
 <body>
   <h1>Affichage de l'adresse IP</h1>
   <script>
-    fetch('/')
+    fetch('https://track-ip-adress.onrender.com/')
       .then(response => response.json())
       .then(data => {
         console.log('Adresse IP du visiteur:', data.ip);
