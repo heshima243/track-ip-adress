@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IP Logger</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Afficher IP</title>
 </head>
 <body>
-    <h1>Your IP has been logged.</h1>
-    <p>Thank you for visiting this page.</p>
+  <h1>Affichage de l'adresse IP</h1>
+  <script>
+    fetch('/')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Adresse IP du visiteur:', data.ip);
+      })
+      .catch(error => {
+        console.error('Erreur lors de la récupération de l\'adresse IP:', error);
+      });
+  </script>
 </body>
 </html>
