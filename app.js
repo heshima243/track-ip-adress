@@ -1,23 +1,11 @@
+// server.js
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const axios = require('axios');
+const cors = require('cors'); // Assure-toi d'importer le package cors
 
 // Modèle Mongoose pour Visitor
 const visitorSchema = new mongoose.Schema({
   ip: String,
-  continentCode: String,
-  continentName: String,
-  countryCode: String,
-  countryName: String,
-  countryNameNative: String,
-  officialCountryName: String,
-  regionCode: String,
-  regionName: String,
-  cityGeoNameId: Number,
-  city: String,
-  latitude: Number,
-  longitude: Number,
   timestamp: { type: Date, default: Date.now }
 });
 const Visitor = mongoose.model('Visitor', visitorSchema);
@@ -30,7 +18,7 @@ mongoose.connect('mongodb+srv://heshimajulienofficial:gZo66bAOKJBetFSQ@localisat
   .catch(err => console.error('Erreur de connexion à MongoDB:', err));
 
 // Configurer CORS
-const allowedOrigins = ['https://track-ip-adress.vercel.app']; 
+const allowedOrigins = ['https://track-ip-adress.vercel.app']; // Liste des domaines autorisés
 app.use(cors({
   origin: function(origin, callback){
     if(!origin || allowedOrigins.indexOf(origin) !== -1){
@@ -45,70 +33,18 @@ app.use(express.json());
 
 app.get('/', async (req, res) => {
   try {
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress.split(',')[0].trim();
-    
-    if (ip === '::1') {
-      return res.status(400).json({ error: 'Adresse IP locale non valide' });
-    }
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    console.log('Adresse IP récupérée:', ip);
+    // Enregistre l'adresse IP dans MongoDB
+    await Visitor.create({ ip });
 
-    const response = await axios.get(`https://apiip.net/api/check?ip=${ip}&accessKey=YOUR_ACCESS_KEY`);
-
-    console.log('Réponse API:', response.data);
-
-    const {
-      ip: ipAddress,
-      continentCode,
-      continentName,
-      countryCode,
-      countryName,
-      countryNameNative,
-      officialCountryName,
-      regionCode,
-      regionName,
-      city,
-      latitude,
-      longitude
-    } = response.data;
-
-    await Visitor.create({ 
-      ip: ipAddress, 
-      continentCode, 
-      continentName, 
-      countryCode, 
-      countryName, 
-      countryNameNative, 
-      officialCountryName, 
-      regionCode, 
-      regionName, 
-      cityGeoNameId: null,
-      city, 
-      latitude, 
-      longitude 
-    });
-
-    res.json({ 
-      ip: ipAddress, 
-      continentCode, 
-      continentName, 
-      countryCode, 
-      countryName, 
-      countryNameNative, 
-      officialCountryName, 
-      regionCode, 
-      regionName, 
-      cityGeoNameId: null,
-      city, 
-      latitude, 
-      longitude 
-    });
+    // Envoie l'adresse IP au client
+    res.json({ ip });
   } catch (error) {
-    console.error('Erreur lors de l\'enregistrement des informations:', error.response ? error.response.data : error.message);
-    res.status(500).send('Erreur lors de l\'enregistrement des informations.');
+    console.error('Erreur lors de l\'enregistrement de l\'adresse IP:', error);
+    res.status(500).send('Erreur lors de l\'enregistrement de l\'adresse IP.');
   }
 });
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
