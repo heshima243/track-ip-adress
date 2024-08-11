@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const axios = require('axios'); // Ajoute axios pour faire des requêtes HTTP
+const axios = require('axios');
 
 // Modèle Mongoose pour Visitor
 const visitorSchema = new mongoose.Schema({
