@@ -45,15 +45,18 @@ app.use(express.json());
 
 app.get('/', async (req, res) => {
   try {
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress.split(',')[0].trim();
+    
+    if (ip === '::1') {
+      return res.status(400).json({ error: 'Adresse IP locale non valide' });
+    }
 
-    // Remplacez 'YOUR_ACCESS_KEY' par ta clé d'API obtenue
-    const response = await axios.get(`https://apiip.net/api/check?ip=${ip}&accessKey=08b90849-de12-49b9-b743-5f65a5848f9e`);
+    console.log('Adresse IP récupérée:', ip);
 
-    // Afficher la réponse complète de l'API
+    const response = await axios.get(`https://apiip.net/api/check?ip=${ip}&accessKey=YOUR_ACCESS_KEY`);
+
     console.log('Réponse API:', response.data);
 
-    // Extraction des données avec des fallbacks pour éviter les erreurs
     const {
       ip: ipAddress,
       continentCode,
@@ -69,7 +72,6 @@ app.get('/', async (req, res) => {
       longitude
     } = response.data;
 
-    // Enregistre les informations dans MongoDB
     await Visitor.create({ 
       ip: ipAddress, 
       continentCode, 
@@ -80,13 +82,12 @@ app.get('/', async (req, res) => {
       officialCountryName, 
       regionCode, 
       regionName, 
-      cityGeoNameId: null, // apiip.net ne fournit pas l'ID GeoNames de la ville
+      cityGeoNameId: null,
       city, 
       latitude, 
       longitude 
     });
 
-    // Envoie les informations au client
     res.json({ 
       ip: ipAddress, 
       continentCode, 
@@ -107,6 +108,7 @@ app.get('/', async (req, res) => {
     res.status(500).send('Erreur lors de l\'enregistrement des informations.');
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
