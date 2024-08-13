@@ -31,20 +31,50 @@ app.use(cors({
 
 app.use(express.json());
 
+const axios = require('axios');
+
 app.get('/', async (req, res) => {
   try {
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.connection.remoteAddress;
 
-    // Enregistre l'adresse IP dans MongoDB
-    await Visitor.create({ ip });
+    // Utilisez une API de géolocalisation plus précise
+    const response = await axios.get(`https://ipapi.co/${ip}/json/`);
 
-    // Envoie l'adresse IP au client
-    res.json({ ip });
+    const locationData = response.data;
+
+    // Enregistre l'adresse IP et les informations de localisation dans MongoDB
+    await Visitor.create({
+      ip: ip,
+      timestamp: Date.now(),
+      city: locationData.city,
+      region: locationData.region,
+      country: locationData.country_name,
+      loc: locationData.latitude + ',' + locationData.longitude
+    });
+
+    // Envoie les informations de localisation au client
+    res.json({ ip, location: locationData });
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement de l\'adresse IP:', error);
     res.status(500).send('Erreur lors de l\'enregistrement de l\'adresse IP.');
   }
 });
+
+
+// app.get('/', async (req, res) => {
+//   try {
+//     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+//     // Enregistre l'adresse IP dans MongoDB
+//     await Visitor.create({ ip });
+
+//     // Envoie l'adresse IP au client
+//     res.json({ ip });
+//   } catch (error) {
+//     console.error('Erreur lors de l\'enregistrement de l\'adresse IP:', error);
+//     res.status(500).send('Erreur lors de l\'enregistrement de l\'adresse IP.');
+//   }
+// });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
