@@ -81,81 +81,143 @@
 //   console.log(`Server running on port ${PORT}`);
 // });
 
+// const express = require('express');
+// const mongoose = require('mongoose');
+// const cors = require('cors');
+// const axios = require('axios');
+// require('dotenv').config(); // Load environment variables
+
+// // Mongoose Model for Visitor
+// const visitorSchema = new mongoose.Schema({
+//   ip: String,
+//   timestamp: { type: Date, default: Date.now },
+//   city: String,
+//   region: String,
+//   country: String,
+//   loc: String,
+// });
+
+// const Visitor = mongoose.model('Visitor', visitorSchema);
+
+// const app = express();
+
+// // Connect to MongoDB
+// mongoose.connect(process.env.MONGODB_URI, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// })
+//   .then(() => console.log('Connected to MongoDB'))
+//   .catch((err) => console.error('MongoDB connection error:', err));
+
+// // Configure CORS
+// const allowedOrigins = ['https://track-ip-adress.vercel.app']; // List of allowed domains
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'), false);
+//     }
+//   },
+// }));
+
+// app.use(express.json());
+
+// app.get('/', async (req, res) => {
+//   try {
+//     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
+
+//     // Use a different geolocation API
+//     const response = await axios.get(`https://ipinfo.io/${ip}/json?token=${process.env.IPINFO_TOKEN}`);
+//     console.log('API Response:', response.data); // Log the entire response
+//     const locationData = response.data;
+
+//     if (!locationData || !locationData.ip) {
+//       throw new Error('Failed to retrieve location data');
+//     }
+
+//     // Save the IP address and location information to MongoDB
+//     await Visitor.create({
+//       ip,
+//       city: locationData.city,
+//       region: locationData.region,
+//       country: locationData.country,
+//       loc: locationData.loc,
+//     });
+
+//     // Send the location information to the client
+//     res.json({ ip, location: locationData });
+//   } catch (error) {
+//     console.error('Error saving IP address:', error);
+//     res.status(500).send('Error saving IP address.');
+//   }
+// });
+
+
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
+
 const express = require('express');
-const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const cors = require('cors');
-const axios = require('axios');
-require('dotenv').config(); // Load environment variables
-
-// Mongoose Model for Visitor
-const visitorSchema = new mongoose.Schema({
-  ip: String,
-  timestamp: { type: Date, default: Date.now },
-  city: String,
-  region: String,
-  country: String,
-  loc: String,
-});
-
-const Visitor = mongoose.model('Visitor', visitorSchema);
+const mongoose = require('mongoose');
+require('dotenv').config(); // Charger les variables d'environnement
 
 const app = express();
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+app.use(bodyParser.json());
 
-// Configure CORS
-const allowedOrigins = ['https://track-ip-adress.vercel.app']; // List of allowed domains
+// Configurer CORS pour permettre les requêtes depuis le domaine front-end
+const allowedOrigins = ['https://track-ip-adress.vercel.app'];
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'), false);
-    }
-  },
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Non autorisé par CORS'), false);
+        }
+    },
 }));
 
-app.use(express.json());
+// Connexion à MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+    .then(() => console.log('Connecté à MongoDB'))
+    .catch((err) => console.error('Erreur de connexion à MongoDB:', err));
 
-app.get('/', async (req, res) => {
-  try {
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
-
-    // Use a different geolocation API
-    const response = await axios.get(`https://ipinfo.io/${ip}/json?token=${process.env.IPINFO_TOKEN}`);
-    console.log('API Response:', response.data); // Log the entire response
-    const locationData = response.data;
-
-    if (!locationData || !locationData.ip) {
-      throw new Error('Failed to retrieve location data');
-    }
-
-    // Save the IP address and location information to MongoDB
-    await Visitor.create({
-      ip,
-      city: locationData.city,
-      region: locationData.region,
-      country: locationData.country,
-      loc: locationData.loc,
-    });
-
-    // Send the location information to the client
-    res.json({ ip, location: locationData });
-  } catch (error) {
-    console.error('Error saving IP address:', error);
-    res.status(500).send('Error saving IP address.');
-  }
+// Définir le modèle Mongoose pour stocker les coordonnées
+const locationSchema = new mongoose.Schema({
+    latitude: Number,
+    longitude: Number,
+    timestamp: { type: Date, default: Date.now },
 });
 
+const Location = mongoose.model('Location', locationSchema);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.post('/api/location', async (req, res) => {
+    const { latitude, longitude } = req.body;
+
+    try {
+        // Sauvegarder les coordonnées dans la base de données
+        const newLocation = new Location({
+            latitude,
+            longitude,
+        });
+
+        await newLocation.save();
+        console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+        res.status(200).send('Coordonnées reçues et enregistrées');
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde des coordonnées:', error);
+        res.status(500).send('Erreur lors de la sauvegarde des coordonnées.');
+    }
+});
+
+app.listen(3000, () => {
+    console.log('Serveur en écoute sur le port 3000');
 });
 

