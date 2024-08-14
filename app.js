@@ -127,8 +127,9 @@ app.get('/', async (req, res) => {
   try {
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
 
-    // Use a more precise geolocation API
-    const response = await axios.get(`https://ipapi.co/${ip}/json/`);
+    // Use a different geolocation API
+    const response = await axios.get(`https://ipinfo.io/${ip}/json?token=${process.env.IPINFO_TOKEN}`);
+    console.log('API Response:', response.data); // Log the entire response
     const locationData = response.data;
 
     if (!locationData || !locationData.ip) {
@@ -140,8 +141,8 @@ app.get('/', async (req, res) => {
       ip,
       city: locationData.city,
       region: locationData.region,
-      country: locationData.country_name,
-      loc: locationData.latitude + ',' + locationData.longitude,
+      country: locationData.country,
+      loc: locationData.loc,
     });
 
     // Send the location information to the client
@@ -151,6 +152,7 @@ app.get('/', async (req, res) => {
     res.status(500).send('Error saving IP address.');
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
