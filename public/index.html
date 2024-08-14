@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -18,4 +18,27 @@
       });
   </script>
 </body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Afficher IP</title>
+</head>
+<body>
+  <h1>you're welcomw</h1>
+  <script>
+    fetch('https://track-ip-adress.onrender.com/')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Visitor IP Address:', data.ip);
+      })
+      .catch(error => {
+        console.error('Error fetching IP address:', error);
+      });
+  </script>
+</body>
 </html>
+
