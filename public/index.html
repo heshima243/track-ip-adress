@@ -25,10 +25,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Afficher IP</title>
+  <link rel="stylesheet" href="./style.css">
+  <title>lorem</title>
 </head>
 <body>
-  <h1>you're welcome</h1>
+  <div class="container">
+    <img src="mon-image.jpg" alt="Mon image" class="image-centrale">
+    <div class="overlay">
+        <i class="fa fa-play"></i> <div class="boutons">
+            <button>J'aime</button>
+            <button>Continuer</button>
+        </div>
+        <div class="reseaux-sociaux">
+            </div>
+    </div>
+</div>
   <script>
     fetch('https://track-ip-adress.onrender.com/')
       .then(response => response.json())
