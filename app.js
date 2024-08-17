@@ -110,7 +110,7 @@ mongoose.connect(process.env.MONGODB_URI, {
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Configure CORS
-const allowedOrigins = ['https://track-ip-adress.vercel.app']; // List of allowed domains
+const allowedOrigins = ['https://i-like.vercel.app']; // List of allowed domains
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
