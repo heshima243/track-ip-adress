@@ -1,32 +1,82 @@
 body {
     margin: 0;
+    padding: 0;
+    background-color: #003366; /* Bleu foncé */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #000080; /* Bleu foncé */
+    color: white;
+    font-family: Arial, sans-serif;
 }
 
 .container {
+    text-align: center;
     position: relative;
 }
 
-.image-centrale {
-    max-width: 100%;
-    height: auto;
+.social-icons {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
 }
 
-.overlay {
+.icon {
+    font-size: 24px;
+    color: white;
+    text-decoration: none;
+}
+
+.image-container {
+    position: relative;
+}
+
+.image-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.play-button {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
+    font-size: 48px;
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    padding: 15px 30px;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #003366;
 }
 
-.fa-play {
-    font-size: 50px;
+.notification {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: bold;
+    color: yellow;
+    animation: blink 1s infinite;
+}
+.notification p a{
+    color: yellow; 
+}
+.notification span a{
+    color: red; 
+    font-weight: bold;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: large;
+  
 }
 
-/* Personnalisez les styles des boutons et des icônes de réseaux sociaux ici */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
