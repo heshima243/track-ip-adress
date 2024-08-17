@@ -127,8 +127,8 @@ app.get('/', async (req, res) => {
   try {
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
 
-    // Use a different geolocation API
-    const response = await axios.get(`https://ipapi.co/${ip}/json?token=${process.env.IPINFO_TOKEN}`);
+    // Correctly format the API request URL for IPinfo
+    const response = await axios.get(`https://ipinfo.io/${ip}/json?token=${process.env.IPINFO_TOKEN}`);
     console.log('API Response:', response.data); // Log the entire response
     const locationData = response.data;
 
